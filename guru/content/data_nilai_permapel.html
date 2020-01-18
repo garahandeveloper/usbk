@@ -1,0 +1,144 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	dataujian();
+	});
+	function ajaxload(){
+		$(".modal-class").click(function(){
+			var element = $(this);
+			var id_ujian = element.attr("id");
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_nilai_siswa_usba",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_ujian=" + id_ujian,
+				success : function(data){
+					isiData = "";
+					isiData += data[0]["ujian"];
+					isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"delnili();"+
+							"});<\/script>";
+					isiData += "<table class='table table-hover'>";
+					isiData += "<thead>"+
+	        			"<tr>" +
+							"<th>Nama</th>" +
+	        				"<th>Nilai</th>" +
+							"<th>ACT</th>" + 
+	        			"</tr>" +
+	        			"</thead>";
+					for(var i = 0; i < data.length; i++){
+						if (data[i]["nilai_siswa"] == null || data[i]["nilai_siswa"] == "") {
+							var nilaiSiswa = "";
+						} else {
+							var nilaiSiswa = data[i]["nilai_siswa"];
+							isiData += "<tr>" +
+									"<td>" + data[i]["nama_siswa"] + "</td>" +
+									"<td>"+ data[i]["nilai_siswa"] + " </td>" +
+									"<td></td>" +
+								"</tr>";
+						}
+						//<button class='btn btn-danger btn-del-nilai' id='"+ data[i]["nisn"] + "' value='"+ data[i]["nik"] + "' data='"+ data[i]["token"] + "'>DEL</button>
+					}
+					
+					isiData += "</table>";
+					$(".lihat-nilai-class").html(isiData);
+				}
+			});
+		});
+	}
+	function dataujian(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_soal_usba/dataujian",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"ajaxload();"+
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Nama Ujian</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Materi</th>" +
+        				"<th>Act</th>" 
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["ujian"] + "</td>" +
+						"<td>" + data[i]["kelas"] + "</td>" +
+						"<td>" + data[i]["materi"] + "</td>" +
+						"<td>"+
+							"<a href='#'  class='btn btn-primary modal-class' data-toggle='modal' data-target='#myModal' id='"+data[i]["id_ujian"]+"'>lihat Nilai</a>"+
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-ujian").html(isiData);
+			}
+		});
+	}
+	function delnili(){
+		$(".btn-del-nilai").on("click", function(){
+			if(confirm("Yakin ingin meng hapus")){
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_nilai_siswa_usba/deletenilai",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "keyId=1&nisn=" + $(this).attr("id") + "&nik=" + $(this).attr("value") + "&token=" + $(this).attr("data"),
+					success : function(data){
+					alert(data[0]["message"]);
+					}
+				});
+			}
+		});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Nilai Siswa
+		</div>
+		<div class="panel-body">
+			<div class="content-view-ujian"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Nilai Ujian</h4>
+        <button class="btn btn-primary" onclick="PrintElem('.lihat-nilai-class')">Print</button>
+      </div>
+      <div class="modal-body">
+        <div class="lihat-nilai-class"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>
+

@@ -1,0 +1,341 @@
+<style type="text/css">
+	.action-class-soal {
+		position: absolute;
+		right: 20px;
+		margin-top: -50px;
+	}
+</style>
+<script type="text/javascript">
+ 	var roxyFileman = 'ckeditor/plugins/fileman/index.html';
+    $(function () {
+        CKEDITOR.replace('editor-soal-id', {filebrowserBrowseUrl: roxyFileman,
+            filebrowserImageBrowseUrl: roxyFileman + '?type=image',
+            removeDialogTabs: 'link:upload;image:upload'});
+    });
+
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ajaxload();
+    	$(".modal-class").on("click", function(){
+    		alert("ok");
+    	});
+    	//ckEditorClick();
+    	
+    	//submitTambahSoal();
+		$("#search-soal").keyup(function(){
+			searchSoalValue = $("#search-soal").val();
+			lihatSoalUjian();
+		});
+		tbhSoal();
+	});
+	var searchSoalValue;
+	function ajaxload(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_soal_usba/dataujian",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"lihatSoalUjian();"+
+							"clickTambahSoal();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Nama Ujian</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Materi</th>" +
+        				"<th>Act</th>" 
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["ujian"] + "</td>" +
+						"<td>" + data[i]["kelas"] + "</td>" +
+						"<td>" + data[i]["materi"] + "</td>" +
+						"<td>"+
+							"<button style='margin-right:10px;'  class='btn btn-primary modal-class tambah-soal-class' data-toggle='modal' data-target='#myModal2' id='"+data[i]["id_ujian"]+"'>Tambah</button>"+
+							"<button  class='btn btn-info modal-class' data-toggle='modal' data-target='#myModal' id='"+data[i]["id_ujian"]+"'>lihat</button>"+
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-ujian").html(isiData);
+			}
+		});
+	}
+	function lihatSoalUjian(){
+		$('.modal-class').click(function(){
+			var elementId = $(this);
+			var id = elementId.attr('id');
+
+		
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_soal_usba/datasoal",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_ujian=" + id,
+				success : function(data){
+					isiData = "";
+					isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteSoal();"+
+							"editSoal();"+
+							
+							"$('.textareaHidden').hide();"+
+							"$('.div-soal').show();"+
+							"});<\/script>";
+					for(var i = 0; i < data.length; i++){
+						var nomer = i + 1;
+						if (data[i]["jawaban"] == "a") {
+							var bga = "style='background:#E6E6FA;'";
+							var bgb = "";
+							var bgc = "";
+							var bgd = "";
+							var bge = "";
+						} else if(data[i]["jawaban"] == "b"){
+							var bga = "";
+							var bgb = "style='background:#E6E6FA;'";
+							var bgc = "";
+							var bgd = "";
+							var bge = "";
+						} else if(data[i]["jawaban"] == "c"){
+							var bga = "";
+							var bgb = "";
+							var bgc = "style='background:#E6E6FA;'";
+							var bgd = "";
+							var bge = "";
+						} else if(data[i]["jawaban"] == "d"){
+							var bga = "";
+							var bgb = "";
+							var bgc = "";
+							var bgd = "style='background:#E6E6FA;'";
+							var bge = "";
+						} else if(data[i]["jawaban"] == "e"){
+							var bga = "";
+							var bgb = "";
+							var bgc = "";
+							var bgd = "";
+							var bge = "style='background:#E6E6FA;'";
+						}
+							isiData += 
+							"<div class='div-soal' id='pilihans-"+ data[i]["id_soal"] + "'>" + nomer + data[i]["soal"] + "</div>" +
+
+							"<div class='pilihan_a' "+ bga+">a. " + data[i]["a"] + "</div>" + 
+
+							"<textarea class='textareaHidden' id='textareaShowa-" + data[i]["id_soal"] + "' style='width: 100%; height:100px;'>" + data[i]["a"] + "</textarea>" +
+
+							"<div class='pilihan_b div-soal' id='pilihanb-"+ data[i]["id_soal"] + "'"+ bgb+" >b. " + data[i]["b"] + "</div>" + 
+
+							"<textarea class='textareaHidden' id='textareaShowb-" + data[i]["id_soal"] + "' style='width: 100%; height:100px;'>" + data[i]["b"] + "</textarea>" +
+
+							"<div class='pilihan_c div-soal' id='pilihanc-"+ data[i]["id_soal"] + "'"+ bgc+">c. " + data[i]["c"] + "</div>" +
+							
+							"<textarea class='textareaHidden' id='textareaShowc-" + data[i]["id_soal"] + "' style='width: 100%; height:100px;'>" + data[i]["c"] + "</textarea>" +
+
+							"<div class='pilihan_d div-soal' id='pilihand-"+ data[i]["id_soal"] + "'"+ bgd+">d. " + data[i]["d"] + "</div>" +
+							
+							"<textarea class='textareaHidden' id='textareaShowd-" + data[i]["id_soal"] + "' style='width: 100%; height:100px;'>" + data[i]["d"] + "</textarea>" +
+
+							"<div class='pilihan_e div-soal' id='pilihane-"+ data[i]["id_soal"] + "'"+ bge+">e. " + data[i]["e"] + "</div>" +
+							
+							"<textarea class='textareaHidden' id='textareaShowe-" + data[i]["id_soal"] + "' style='width: 100%; height:100px;'>" + data[i]["e"] + "</textarea>" +
+
+							"<div class='action-class-soal'>" + 
+								"<button class='btn btn-primary btn-class-edit' value='"+ data[i]["id_soal"] +"'>Edit</button> " +
+								" <button class='btn btn-danger btn-class-delete' data-dismiss='modal' value='"+ data[i]["id_soal"] +"'>Delete</button>" +
+							"</div>";			
+						}
+					
+					$(".lihat-soal-class").html(isiData);
+				}
+			});
+
+		});
+		
+	}
+	function editSoal(){
+		$(".btn-class-edit").click(function(){
+			var editbutton = $(this).attr("value");
+
+			soalDiv = "#pilihans"+ editbutton;
+			aDiv = "#pilihans"+ editbutton;
+			bDiv = "#pilihans"+ editbutton;
+			cDiv = "#pilihans"+ editbutton;
+			dDiv = "#pilihans"+ editbutton;
+			eDiv = "#pilihans"+ editbutton;
+
+			//action textarea
+			idTexareaA = "#textareaShowa-" + editbutton;
+			idTexareaB = "#textareaShowb-" + editbutton;
+			idTexareaC = "#textareaShowc-" + editbutton;
+			idTexareaD = "#textareaShowd-" + editbutton;
+			idTexareaE = "#textareaShowe-" + editbutton;
+			$(idTexareaA).show();
+			$(idTexareaB).show();
+			$(idTexareaC).show();
+			$(idTexareaD).show();
+			$(idTexareaE).show();
+			
+			//action 
+		});
+	}
+	function ckEditorClick(){
+		CKEDITOR.replace( "editor-soal-id", {
+			
+		});
+	}
+	function clickTambahSoal(){
+		$(".tambah-soal-class").on("click", function(){
+			var id_ujian = $(this).attr("id");
+			$("#id_ujian_id").val(id_ujian);
+		});
+	}
+	function deleteSoal(){
+		$(".btn-class-delete").click(function(){
+			if (confirm("Yakin Mau Di Hapus")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_soal_usba/deleteSoal",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_soal=" + $(this).attr("value"),
+					success : function(data){
+						lihatSoalUjian();
+					}
+				});
+			}
+			
+		});
+	}
+	function tbhSoal(){
+		$('#form1').submit(function(){
+			var form = this;   
+				$.ajax({
+					type : 'POST',
+					url : linkServer +"Api_data_soal_usba/inputDataSoal",
+					data : $(this).serialize(),
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					success : function(data){
+						console.log(data);
+						if (data[0]["status"] == 1) {
+								alert("Soal Berhasil Di Masukan");
+								//clear data in input text
+								CKEDITOR.instances['editor-soal-id'].setData("");
+								$("#editor-a-id").val("");
+								$("#editor-b-id").val("");
+								$("#editor-c-id").val("");
+								$("#editor-d-id").val("");
+								$("#editor-e-id").val("");
+								form.reset();   
+							} else {
+								alert("Soal Sudah Ada Coba Anda Masukan Soal Yang Lain");
+							}
+					}
+				});
+				return false;
+			});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Soal
+		</div>
+		<div class="panel-body">
+			<div class="content-view-ujian"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog" style="width: 90%; margin: auto;">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Data Soal</h4>
+        <input type="text" class="form-control" id="search-soal" name="search" id="search" placeholder="Cari....">
+      </div>
+      <div class="modal-body">
+        <div class="lihat-soal-class"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="myModal2" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog" style="width: 70%; margin: auto;">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Tambah Data Soal</h4>
+      </div>
+      <div class="modal-body">
+     	<form action="#" name="form1" id="form1" method="POST">
+	      	<div class="form-group">
+	      		<label for="email">Soal</label>
+	      		<input type="hidden" name="id_ujian" id="id_ujian_id" hidden>
+	      		<textarea class="form-control ck-editor" name="soal" id="editor-soal-id" ></textarea>
+
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">A</label>
+	      		<textarea class="form-control ck-editor" name="jawabanA" id="editor-a-id" ></textarea>
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">B</label>
+	      		<textarea class="form-control ck-editor" name="jawabanB" id="editor-b-id" ></textarea>
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">C</label>
+	      		<textarea class="form-control ck-editor" name="jawabanC" id="editor-c-id" ></textarea>
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">D</label>
+	      		<textarea class="form-control ck-editor" name="jawabanD" id="editor-d-id" ></textarea>
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">E</label>
+	      		<textarea class="form-control ck-editor" name="jawabanE" id="editor-e-id" ></textarea>
+	      	</div>
+	      	<div class="form-group">
+	      		<label for="email">Jawaban Yang Benar</label>
+	      		<select id="jawaban-benar-id" class="form-control" name="jawabanBenar">
+	      			<option value="">Pilih Jawaban Yang Benar</option>
+	      			<option value="a">A</option>
+	      			<option value="b">B</option>
+	      			<option value="c">C</option>
+	      			<option value="d">D</option>
+	      			<option value="e">E</option>
+	      		</select>
+	      </div>
+	      <div class="modal-footer">
+	      	<button type="submit" class="btn btn-primary btn-tambah-soal-class">Tambah</button>
+	      </div>
+      </form>
+    </div>
+
+  </div>
+</div>

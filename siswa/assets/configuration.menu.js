@@ -1,0 +1,28 @@
+$(document).ready(function(){
+	$(".content-view").load("content/soal.html");
+	$("#login").click(function(){
+		$(".content-view").load("content/soal.html");
+	});
+	$("#data-soal").click(function(){
+		$(".content-view").load("content/data_soal.html");
+	});
+	$("#data-guru").click(function(){
+		$(".content-view").load("content/data_guru.html");
+	});
+	$("#data-materi").click(function(){
+		$(".content-view").load("content/data_materi.html");
+	});
+	$("#data-ujian").click(function(){
+		$(".content-view").load("content/data_ujian.html");
+	});
+	$("#data-nilai").click(function(){
+		$(".content-view").load("content/data_nilai.html");
+	});
+	$("#data-siswa").click(function(){
+		$(".content-view").load("content/data_siswa.html");
+	});
+	$("#data-kelas").click(function(){
+		$(".content-view").load("content/data_kelas.html");
+	});
+
+});

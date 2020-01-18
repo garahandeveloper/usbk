@@ -1,0 +1,349 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ujiangabungan();
+    	inputNewDataUjianGabungan();
+    	inputUjian();
+    	loadmateri();
+    	loadkelas();
+    	loadGuru();
+	});
+	function ujiangabungan(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_ujian_gabungan_usba/ujiangabungan",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteUjianGabungan();"+
+							"ujianSelect();"+
+							"dataUjianGabunganSelect();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Nama Ujian Gabungan</th>" +
+        				"<th>Token Ujian Gabungan</th>" +
+        				"<th>Act</th>" 
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["nama_ujian_gabungan"] + "</td>" +
+						"<td>" + data[i]["token_ujian_gabungan"] + "</td>" +
+						"<td>"+
+							"<button class='btn btn-success edit-class-ujian-gabungan' data-toggle='modal' data-target='#myModal2' id='"+data[i]["id_ujian_gabungan"]+"'>Edit Data</button> "+
+							" <button  class='btn btn-info view-class-data-ujian-gabungan' data-toggle='modal' data-target='#myModal3' id='"+data[i]["id_ujian_gabungan"]+"'>View Data</button> "+
+							"<button  class='btn btn-danger delete-class-ujian-gabungan' id='"+data[i]["id_ujian_gabungan"]+"'> Delete</button>"+
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-ujian-gabungan").html(isiData);
+			}
+		});
+	}
+	function ujianSelect(){
+		$(".edit-class-ujian-gabungan").click(function(){
+			var element = $(this);
+			var id_ujian_gabungan = element.attr("id");
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_gabungan_usba/dataujian",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : $(this).serialize(),
+				success : function(data){
+					isiData = "";
+					isiData += "<script type='text/javascript'>" +
+								"$(document).ready(function(){"+
+								"inputDataUjianGabungan();"+
+								"});<\/script>";
+					isiData += "<input type='hidden' class='text-class-id-gabungan' value='" + id_ujian_gabungan + "' > ";
+					for(var i = 0; i < data.length; i++){
+						var nomer = i + 1;
+						isiData += "<input type='checkbox' class='input-gabungan-class' value='" + data[i]["id_ujian"] + "' > "+data[i]["ujian"]+ "<div style='border:1px solid #ccc;margin-bottom:10px;'></div>";
+					}
+					
+					$(".form-input-class").html(isiData);
+				}
+			});
+		});
+		
+	}
+	function dataUjianGabunganSelect(){
+		$(".view-class-data-ujian-gabungan").click(function(){
+			var element = $(this);
+			var id_ujian_gabungan = element.attr("id");
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_gabungan_usba/dataujianWhere",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_ujian_gabungan=" + id_ujian_gabungan,
+				success : function(data){
+					isiData = "";
+					isiData += "<script type='text/javascript'>" +
+								"$(document).ready(function(){"+
+								"deleteDataUjianGabungan();"+
+								"});<\/script>";
+					for(var i = 0; i < data.length; i++){
+						var nomer = i + 1;
+						isiData += "<br />" + data[i]["nama_ujian"] + 
+						"<button type='button' class='btn btn-danger btn-sm delete-data-ujian-gabungan-class' id='"+data[i]["id_data_ujian_gabungan"]+"' style='position:absolute; right:10px;'>" +
+				        	"Delete" +
+				        "</button>" + 
+				        "<div style='border:1px solid #e5e5e5;'></div>";
+					}
+					
+					$(".form-input-class-view").html(isiData);
+				}
+			});
+		});
+		
+	}
+	function inputNewDataUjianGabungan(){
+		$(".btn-input-class").on("click", function(){
+			var namaUjGb = $("#ujian-gabungan-nama").val();
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_gabungan_usba/inputUjianGabungan",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "nama_ujian_gabungan=" + namaUjGb,
+				success : function(data){				
+					ujiangabungan();
+					$("#ujian-gabungan-nama").val("");
+				}
+			});
+		});
+	}
+	function deleteUjianGabungan(){
+		$(".delete-class-ujian-gabungan").on("click", function(){
+			var element = $(this);
+			var id = element.attr("id");
+			if (confirm("Hapus Data")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_ujian_gabungan_usba/deleteUjianGabungan",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_ujian_gabungan=" + id,
+					success : function(data){
+						alert(data[0]["message"]);
+						ujiangabungan();
+					}
+				});
+			}
+			
+		});
+	}
+	function inputDataUjianGabungan(){
+		$(".input-gabungan-class").change(function(){
+			var id_ujian_gabungan = $(".text-class-id-gabungan").val();
+			var element = $(this);
+			var id_ujian = element.attr("value");
+			//id_ujian_gabungan=" + id_ujian_gabungan+ "&id_ujian=" + id_ujian
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_gabungan_usba/inputDataUjianGabungan",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_ujian_gabungan=" + id_ujian_gabungan+ "&id_ujian=" + id_ujian,
+				success : function(data){
+					alert("Data Tersimpan");
+					ujiangabungan();
+				}
+			});
+		});
+	}
+	function deleteDataUjianGabungan(){
+		$(".delete-data-ujian-gabungan-class").click(function(){
+			var element = $(this);
+			var id_data_ujian_gabungan = element.attr("id");
+			if (confirm("Delete Data")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_ujian_gabungan_usba/deleteDataUjianGabungan",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_data_ujian_gabungan=" + id_data_ujian_gabungan,
+					success : function(data){
+						dataUjianGabunganSelect();
+					}
+				});
+			}
+		});
+	}
+	function inputUjian(){
+		$(".btn-input-ujian-class").on("click",function(){
+			var nama_ujian = $("#nama-ujian-id").val();
+			var kelas_ujian = $("#kelas-ujian-id").val();
+			var guru_ujian = $("#guru-ujian-id").val();
+			var materi_ujian = $("#materi-ujian-id").val();
+			var jumlah_ujian = $("#jumlah-ujian-id").val();
+
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_gabungan_usba/inputUjian",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "nama_ujian=" + nama_ujian + "&kelas=" + kelas_ujian + "&guru=" + guru_ujian + "&materi=" + materi_ujian + "&jumlah_ujian=" + jumlah_ujian,
+				success : function(data){
+					$("#nama-ujian-id").val("");
+					$("#kelas-ujian-id").val("");
+					$("#guru-ujian-id").val("");
+					$("#materi-ujian-id").val("");
+					$("#jumlah-ujian-id").val("");
+					ujian();
+				}
+			});
+		});
+	}
+	function loadmateri(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_materi_usba/datamateri",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='materi-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Materi</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_materi"]+"'>"+data[i]["materi"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-materi").html(isiData);
+			}
+		});
+	}
+	function loadkelas(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_siswa_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='kelas-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Kelas</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_kelas"]+"'>"+data[i]["nama_kelas"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-kelas").html(isiData);
+			}
+		});
+	}
+	function loadGuru(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_guru_usba/dataGuru",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='guru-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Guru</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_guru"]+"'>"+data[i]["nama_guru"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-guru").html(isiData);
+			}
+		});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Ujian Gabungan
+			<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myModal">
+	          <span class="glyphicon glyphicon-plus"></span>
+	        </button>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-ujian-gabungan"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Nama Ujian Gabungan</h4>
+      </div>
+      <div class="modal-body">
+        
+        <input type='text' class='form-control' id='ujian-gabungan-nama' placeholder="Nama Ujian Gabungan" required>
+      </div>
+      <div class="modal-footer">
+      <button type="button" class="btn btn-primary btn-input-class">Simpan</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="myModal2" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Data Ujian Gabungan</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-input-class"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="myModal3" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Data Ujian Gabungan Yang di Pilih</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-input-class-view"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>

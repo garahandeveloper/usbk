@@ -1,0 +1,63 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ajaxload();
+    	$(".modal-class").on("click", function(){
+    		alert("ok");
+    	});
+    	ckEditorClick();
+    	
+	});
+	function ajaxload(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_soal_usba/dataujian",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				
+			}
+		});
+	}
+	
+	function ckEditorClick(){
+		CKEDITOR.replace( "editor-soal-id" );
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Soal
+		</div>
+		<div class="panel-body">
+			<div class="content-view-ujian"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Data Soal</h4>
+      </div>
+      <div class="modal-body">
+        <div class="lihat-soal-class">
+        	<textarea class="form-control ck-editor" name="editor1" id="editor-e-id" ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>

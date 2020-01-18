@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>YPI-NURMA</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/bootstrap/bootstrap.min.css">
+	<script src="assets/bootstrap/1.12.0_jquery.min.js"></script>
+	<script src="assets/bootstrap/bootstrap.min.js"></script>
+	<script src="assets/configuration.menu.js"></script>
+	<script src="ckeditor/ckeditor.js"></script>
+	<script src="assets/highcharts.js"></script>
+	<script src="assets/exporting.js"></script>
+
+	<style>
+	.form-control {
+		}
+		#myProgress {
+		  position: relative;
+		  width: 100%;
+		  height: 30px;
+		  background-color: #ddd;
+		}
+
+		#myBar {
+		  position: absolute;
+		  width: 10%;
+		  height: 100%;
+		  background-color: #4CAF50;
+		}
+
+		#label {
+		  text-align: center;
+		  line-height: 30px;
+		  color: white;
+		}
+		#jawaban {
+			margin-left: 40px;
+		}
+	</style>
+	<script type="text/javascript">
+	var linkServer = "http://ypinurulmannan.or.id/smkservusbk/";
+	$(document).ready(function(){
+		move();
+		logout();
+		checkId();
+	});
+	
+	function move() {
+		var elem = document.getElementById("myBar");   
+		var width = 10;
+		var id = setInterval(frame, 10);
+		function frame() {
+			if (width >= 100) {
+				$("#label").html("Complete");
+				$(".content-view").show();
+			} else {
+				width++; 
+				elem.style.width = width + '%'; 
+				document.getElementById("label").innerHTML = width * 1  + '%';
+				$(".content-view").hide();
+			}
+		}
+	}
+	function logout(){
+		$(".logout-class").on("click", function(){
+			if (confirm("Keluar")) {
+				localStorage.clear();
+				window.location = "login.html";
+			}
+		});
+	}
+	function checkId(){
+		if (localStorage.getItem("nama_guru") == null || localStorage.getItem("username") == null) {
+			window.localStorage.clear();
+			window.location = "login.html";
+		} else {}
+	}
+	function PrintElem(elem) {
+	    Popup(jQuery(elem).html());
+	}
+
+	function Popup(data) {
+	    var mywindow = window.open('', 'my div', '');
+	    mywindow.document.write('<html><head><title></title>');
+	    mywindow.document.write(data);
+	    mywindow.document.write('</body></html>');
+	    mywindow.document.close();
+	    mywindow.print();                        
+	}
+	</script>
+</head>
+<body>
+<nav class="navbar navbar-inverse" style='border-radius:0px;'>
+	<div class="container-fluid" id="menu-id">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">
+			</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+				
+				<li><a href="#" id="data-halaman">Halaman</a></li>
+				
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Data<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li id='user'>
+							<a href="#" id="data-soal">Soal</a>
+						</li>
+						<li id='user'>
+							<a href="#" id="data-guru">Guru</a>
+						</li>
+						<li id='user'>
+							<a href="#" id="data-materi">Materi</a>
+						</li>
+						<li id='user'>
+							<a href="#" id="data-siswa">Siswa</a>
+						</li>
+						
+						<li id='user'>
+							<a href="#" id="data-kelas">Kelas</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Ujian<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li id='user'>
+							<a href="#" id="data-ujian">Ujian</a>
+						</li>
+						<li id='user'>
+							<a href="#" id="data-ujian-gabungan">Ujian Gabungan</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Nilai<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li id='user'>
+							<a href="#" id="data-nilai-permapel">Per Mapel</a>
+						</li>
+						<li id='user'>
+							<a href="#" id="data-nilai-persiswa">Per Siswa</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Data Remedi<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li id='user'>
+							<a href="#" id="data-remedi">Remedi</a>
+						</li>
+					</ul>
+				</li>
+				
+			</ul>
+			
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#" class="logout-class">Logout</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<div class="container" style="margin-bottom: 10px;">
+	<div id="myProgress" class='progress-class'>
+	  <div id="myBar">
+	    <div id="label">10%</div>
+	  </div>
+	</div>
+</div>
+<div class="content-view"></div>
+
+</body>
+</html>

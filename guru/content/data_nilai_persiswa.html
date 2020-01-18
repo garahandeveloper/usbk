@@ -1,0 +1,150 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	datakelas();
+    	$(".btn-input-class").click(function(){
+    		inputData();
+    	});
+    	$(".cetak-data-siswa").on("click", function(){
+    		cetakData();
+    		alert("ok");
+    	});
+	});
+	function ajaxloaddatasiswa(){
+		$('.a-class-lihat').click(function(){
+			var elementId = $(this);
+			var id_kelas = elementId.attr('id');
+			localStorage.setItem("id_kelas", id_kelas);
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_siswa_usba/datasiswa",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_kelas=" + id_kelas,
+				success : function(data){
+					isiData = "";
+					isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"lihatNilai();" +
+							"});<\/script>";
+					isiData += "<table class='table table-hover' id='table-id'>";
+					isiData += "<thead>"+
+						"<tr>" +
+							"<th>No</th>" +
+	        				"<th>Nama</th>" +
+	        				"<th>Nisn</th>" +
+	        				"<th>Nik</th>" +
+	        				"<th>Kelas</th>" +
+	        				"<th>Action</th>" +
+	        			"</tr>" +
+	        			"</thead>";
+					for(var i = 0; i < data.length; i++){
+						var nomer = i + 1;
+						isiData += "<tr>" +
+							"<td>" + nomer + "</td>" +
+							"<td>" + data[i]["nama"] + "</td>" +
+							"<td>" + data[i]["nisn"] + "</td>" +
+							"<td>" + data[i]["nik"] + "</td>" +
+							"<td>" + data[i]["kelas"] + "</td>" +
+							"<td>" +
+								"<a href='#' class='btn btn-primary btn-class-lihat lihat-nilai-persiswa-class' id='"+data[i]["nisn"]+"' data-toggle='modal' data-target='#myModal' value='"+data[i]["nik"]+"'>Lihat Nilai</a>" + 
+							"</td>" +
+						"</tr>";
+					}
+					
+					isiData += "</table>";
+					$(".content-view-siswa").html(isiData);
+				}
+			});
+		});
+	}
+	function datakelas(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_siswa_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"ajaxloaddatasiswa();"+
+							"});<\/script>";
+				isiData += "<table class='table table-hover' id='table-id'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Action</th>" +
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["nama_kelas"] + "</td>" +
+						"<td>" +
+							"<a href='#' class='a-class-lihat' id='"+data[i]["id_kelas"]+"' >Lihat Siswa</a>" + 
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-kelas").html(isiData);
+			}
+		});
+	}
+	function lihatNilai(){
+		$(".lihat-nilai-persiswa-class").on("click", function(){
+			var nisn = $(this).attr("id");
+			var nik = $(this).attr("value");
+			
+			$(".lihat-nilai-siswa-class").html();
+		});
+	}
+</script>
+<div class="container" id="container-id">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Kelas
+		</div>
+		<div class="panel-body">
+			<div class="content-view-kelas"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Siswa
+		</div>
+		<div class="panel-body">
+			<div class="content-view-siswa"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<div id="myModal" class="modal fade" role="dialog" style="overflow:scroll;">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Data Soal</h4>
+      </div>
+      <div class="modal-body">
+        <div class="lihat-nilai-siswa-class"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+
+  </div>
+</div>

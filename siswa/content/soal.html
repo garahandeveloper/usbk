@@ -1,0 +1,251 @@
+<style type='text/css'>
+	.form-control {
+	}
+	#myProgress {
+	  position: relative;
+	  width: 100%;
+	  height: 5px;
+	  background-color: #ddd;
+	}
+	#myBar {
+	  position: absolute;
+	  width: 1%;
+	  height: 100%;
+	  background-color: red;
+	}
+	#label {
+	  text-align: center;
+	  line-height: 30px;
+	  color: white;
+	}
+	#jawaban {
+		margin-left: 40px;
+	}
+	.panel-pakek { 
+		background: #e5e5e5; 
+		border: 5px solid #000; 
+	}
+	.progress-class {
+		top: -20px;
+	}
+
+</style>
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+		ajaxload();
+		idSiswa();
+		move();
+		$('#form1').submit(function(){
+			var jawaban = $("#jawaban:checked").val();
+			if (jawaban == null || jawaban == "") {
+				var linkData = "";
+				alert("Belum Memilih jawaban");
+			}
+			else {
+				var linkData = linkServer +"Api_jawaban_soal_siswa_usba";
+			}
+			
+			$.ajax({
+				type : 'POST',
+				url : linkData,
+				data : $(this).serialize(),
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				success : function(data){
+					if(data[0]["message"] == 1){
+						$(".btn-submit").hide();
+						alert("Jawaban Anda Sudah Di simpan");
+						window.localStorage.removeItem("no_soal");
+						move();
+						ajaxload();
+					} else {
+						alert("Sebaik Nya Anda Bersabar Dalam Menunggu Soal");
+						move();
+						ajaxload();
+						window.localStorage.removeItem("no_soal");
+					}
+				}
+			})
+			return false;
+		});
+
+		loadPaketUjian();
+	});
+	function move() {
+		var elem = document.getElementById("myBar");   
+		var width = 10;
+		var id = setInterval(frame, 20);
+		function frame() {
+			if (width >= 100) {
+				//$(".content-view-soal").show();
+			} else {
+				width++; 
+				elem.style.width = width + '%'; 
+				document.getElementById("label").innerHTML = width * 1  + '%';
+			}
+		}
+	}
+	function ajaxload(){
+		var nisnPost = localStorage.getItem("nisn");
+		var nikPost = localStorage.getItem("nik");
+		var tokenPost = localStorage.getItem("token");
+		
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_lihat_soal_client_usba",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "nisn=" + nisnPost + "&&nik=" + nikPost + "&&token=" + tokenPost,
+			success : function(data){
+				//alert(data[0]["status_nilai"]);
+				if (data[0]["status_nilai"] == "1") {
+					isi = "Nilai " + data[0]["nilai"];
+					$(".logout-class").show();
+					$(".btn-submit").hide();
+					pilihUjianClassShow();
+				} else {
+					pilihUjianClassHide();
+					$(".logout-class").show();
+					$(".btn-submit").hide();
+					isi = "";
+					isi += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"checkedShow();" +
+							"});<\/script>";
+					isi += "<style>#jawaban {width:1.5em;height:1.5em;}</style>";
+						// ini bukan nomer soal yang ke database
+						// yang ke data base menngunakan id soal
+						isi += 
+						"<input type='hidden' name='nisn' value='"+ nisnPost +"' hidden>"+ 
+						"<input type='hidden' name='nik' value='"+ nikPost +"' hidden>" +
+						"<input type='hidden' name='token' value='"+ tokenPost +"' hidden>" +
+						"<input type='hidden' name='no_soal' value='"+data[0]["no_soal"]+"' hidden>" +
+						"<button type='button' class='btn btn-info'>"+ data[0]['jumlah_jawab'] +"</button> " + data[0]["soal"] + "<br />" + 
+						"<input type='radio' name='jawaban' class='jawaban-class' id='jawaban' value='a'> " + data[0]["a"] + "<br />" +
+						"<input type='radio' name='jawaban' class='jawaban-class' id='jawaban' value='b'> " + data[0]["b"] + "<br />" +
+						"<input type='radio' name='jawaban' class='jawaban-class' id='jawaban' value='c'> " + data[0]["c"] + "<br />" +
+						"<input type='radio' name='jawaban' class='jawaban-class' id='jawaban' value='d'> " + data[0]["d"] + "<br />" +
+						"<input type='radio' name='jawaban' class='jawaban-class' id='jawaban' value='e'> " + data[0]["e"] + "<br />" +
+						"<hr />";
+				}
+				$(".content-view-soal").html(isi);
+				
+			}
+		});
+	}
+	function clearLocalStorage(){
+		window.localStorage.clear();
+	}
+	if(localStorage.getItem("saveWaktu") == null || localStorage.getItem("saveWaktu") == 1){
+		var time = 2700;
+	} else {
+		var time = localStorage.getItem("saveWaktu");
+	}
+		
+	function waktuUjian(){
+		if(time > 0){
+			
+			time--;
+			menit = time / 60;
+			var waktu = time + 1;
+			
+			localStorage.setItem("saveWaktu", waktu);
+			var lo = localStorage.getItem("saveWaktu");
+			$("#waktu-ujian").html("Sisa Waktu Ujian " + menit.toFixed(0) + " Menit ");
+			setTimeout("waktuUjian()", 1000);
+		}else {
+			$("#waktu-ujian").html("Waktu Habis");
+		}
+	}
+	waktuUjian();
+
+
+	function loadPaketUjian(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer + "Api_lihat_soal_client_usba/dataUjianGabungan",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "token=" + localStorage.getItem("token"),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"createTokenNew();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover' id='table-id'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>Nama Ujian</th>" +
+						"<th>kelas</th>" +
+						"<th>materi</th>" +
+						"<th>guru</th>" +
+        			"</tr>" +
+        			"</thead>";
+					isiData += "<tr>" +
+						"<td>" + data[0]["nama_ujian"] + "</td>" +
+						"<td>" + data[0]["kelas"] + "</td>" +
+						"<td>" + data[0]["materi"] + "</td>" +
+						"<td>" + data[0]["guru"] + "</td>" +
+							
+					"</tr>";
+				
+				isiData += "</table>";
+				$(".data-paket-ujian-class").html(isiData);
+			}
+		});
+	}
+	function createTokenNew(){
+		$(".pilih-ujian-class").click(function(){
+			var element = $(this);
+			var token = element.attr("id");
+			localStorage.setItem("token", token);
+			ajaxload();
+			//loadPaketUjian();
+		});
+	}
+	function pilihUjianClassShow(){
+		$(".pilih-ujian-class").show();
+	}
+	function pilihUjianClassHide(){
+		$(".pilih-ujian-class").hide();
+	}
+	function checkedShow(){
+		$(".jawaban-class").change(function(){
+			var element = $(this);
+			var data = element.attr("value");
+			$(".btn-submit").show();
+		});
+	}
+	function idSiswa(){
+		$(".nisn").html("Nama Siswa : " + localStorage.getItem("nama_siswa") + " Nisn : "  + localStorage.getItem("nisn") + " Nik : " + localStorage.getItem("nik"));
+	}
+</script>
+<div id="myProgress" class='progress-class'>
+	<div id="myBar">
+		<div id="label">10%</div>
+	</div>
+</div>
+<div class="container">
+	<div class="panel panel-default panel-pakek" style="top: -60px;">
+		<div class="panel-body">
+			<div class="nisn" style="padding: 10px;padding:10px;font-size:24px;font-family:\22Arial Black\22,sans-serif;color:rgba(7, 7, 18, 0.75);"></div>
+			<div class="data-paket-ujian-class"></div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<div id="waktu-ujian">Waktu</div>	
+		</div>
+		<div class="panel-body class-panel-lihat-soal">
+			<form action='#' role="form" method="post" id='form1' name="form1">
+				<div class="content-view-soal">Loading</div>
+				<button type='submit' class='btn btn-primary btn-submit'>Lanjutkan</button>
+			</form>
+		</div>
+	</div>
+</div>

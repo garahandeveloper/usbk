@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>YPI-NURMA</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="api/bootstrap/bootstrap.min.css">
+	<script src="api/bootstrap/1.12.0_jquery.min.js"></script>
+	<script src="api/bootstrap/bootstrap.min.js"></script>
+	<script src="assets/configuration.menu.js"></script>
+	
+	<script type="text/javascript">
+	var linkServer = "http://ypinurulmannan.or.id/smkservusbk/";
+	$(document).ready(function(){
+		//move();
+		logout();
+		checkId();
+	});
+	
+	
+	function logout(){
+		$(".logout-class").on("click", function(){
+			if (confirm("Keluar")) {
+				localStorage.clear();
+				window.location = "login.html";
+			}
+		});
+	}
+	function checkId(){
+		if (localStorage.getItem("nama_siswa") == null || localStorage.getItem("nisn") == null || localStorage.getItem("nik") == null || localStorage.getItem("token") == null) {
+			window.localStorage.clear();
+			window.location = "login.html";
+		} else {}
+	}
+	</script>
+</head>
+<body>
+<nav class="navbar navbar-inverse" style='border-radius:0px;'>
+	<div class="container-fluid" id="menu-id">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">
+			</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#" class="logout-class">Logout</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<div class="content-view"></div>
+
+</body>
+</html>

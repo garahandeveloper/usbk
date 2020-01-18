@@ -1,0 +1,197 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ajaxload();
+
+    	$(".btn-input-class").click(function(){
+    		inputData();
+    	});
+    	deleteData();
+    	resetForm();
+    	editDataGuru();
+	});
+	function ajaxload(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_guru_usba/dataGuru",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteData();"+
+							"viewEditData();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Nama Guru</th>" +
+        				"<th>Username</th>" +
+        				"<th>Password</th>" +
+        				"<th>Action</th>" +
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["nama_guru"] + "</td>" +
+						"<td>" + data[i]["username"] + "</td>" +
+						"<td>***************</td>" +
+						"<td>" +
+							"<button class='btn btn-success btn-class-edit' id='"+data[i]["id_guru"]+"' data-toggle='modal' data-target='#myModal'>Edit</button> " + 
+							" <button class='btn btn-danger btn-class-delete' id='"+data[i]["id_guru"]+"'>Delete</button>" + 
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-guru").html(isiData);
+			}
+		});
+	}
+	function inputData(){
+		var guru = $("#guru-id").val();
+		var username = $("#username-id").val();
+		var password = $("#password-id").val();
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_guru_usba/inputDataGuru",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "nama_guru=" + guru + "&username=" + username + "&password=" + password,
+			success : function(data){
+				$("#guru-id").val("");
+				$("#username-id").val("");
+				$("#password-id").val("");
+				ajaxload();
+			}
+		});
+	}
+	function deleteData(){
+		$(".btn-class-delete").on("click", function(){
+			var element = $(this);
+			var id_guru = element.attr("id");
+			if (confirm("Delete Data Guru")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_guru_usba/deleteDataGuru",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_guru=" + id_guru,
+					success : function(data){
+						alert(data[0]["message"]);
+						ajaxload();
+					}
+				});
+			}
+		});
+	}
+	function viewEditData(){
+		$(".btn-class-edit").on("click", function(){
+			var element = $(this);
+			var id_guru = element.attr("id");
+			$(".btn-input-class").hide();
+			$(".btn-edit-class").show();
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_guru_usba/viewEditGuru",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_guru=" + id_guru,
+				success : function(data){
+					$("#id_guru-id").val(data[0]["id_guru"]);
+					$("#guru-id").val(data[0]["nama_guru"]);
+					$("#username-id").val(data[0]["username"]);
+					$("#password-id").val("");
+				}
+			});
+		});
+	}
+	function resetForm(){
+		$(".input-data-class").on("click", function(){
+			$("#id_guru-id").val("");
+			$("#guru-id").val("");
+			$("#username-id").val("");
+			$("#password-id").val("");
+			$(".btn-input-class").show();
+			$(".btn-edit-class").hide();
+		});
+	}
+	function editDataGuru(){
+		$(".btn-edit-class").on("click", function(){
+			var id = $("#id_guru-id").val();
+			var nama_guru = $("#guru-id").val();
+			var username = $("#username-id").val();
+			var password = $("#password-id").val();
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_guru_usba/editDataGuru",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_guru=" + id + "&nama_guru=" + nama_guru + "&username=" + username + "&password=" + password,
+				success : function(data){
+					$("#id_guru-id").val("");
+					$("#guru-id").val("");
+					$("#username-id").val("");
+					$("#password-id").val("");
+					ajaxload();
+				}
+			});
+		});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Guru
+			<button type="button" class="btn btn-default btn-sm input-data-class" data-toggle="modal" data-target="#myModal">
+	          <span class="glyphicon glyphicon-plus"></span>
+	        </button>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-guru"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Tambah Data Guru</h4>
+      </div>
+      <div class="modal-body">
+
+	    <div class="form-group">
+	    	<input type="hidden" name="" id="id_guru-id" hidden>
+	        <input type="text" class="form-control" name="guru" id="guru-id" placeholder="Nama Guru" required>
+        </div>
+        <div class="form-group">
+	        <input type="text" class="form-control" name="guru" id="username-id" placeholder="Username" required>
+		</div>
+        <div class="form-group">
+	        <input type="password" class="form-control" name="guru" id="password-id" placeholder="Password" required>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary btn-input-class" data-dismiss="modal">Simpan</button>
+      	<button type="button" class="btn btn-primary btn-edit-class" data-dismiss="modal">Edit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,176 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ajaxload();
+    	inputData();
+    	deleteData();
+    	inputClick();
+    	senEditMateri();
+    	
+
+	});
+	function ajaxload(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_materi_usba/datamateri",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteData();"+
+							"editView();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Materi</th>" +
+        				"<th>Action</th>" +
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["materi"] + "</td>" +
+						"<td>" +
+							"<button  class='btn btn-info btn-class-edit' id='"+data[i]["id_materi"]+"' data-toggle='modal' data-target='#myModal'>Edit</button> " + 
+							" <button  class='btn btn-danger btn-class-delete' id='"+data[i]["id_materi"]+"'>Delete</button>" + 
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-materi").html(isiData);
+			}
+		});
+	}
+	function inputData(){
+		$(".btn-input-class").click(function(){
+    		var materiInput = $("#materi-id").val();
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_materi_usba/inputMateri",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "materi=" + materiInput,
+				success : function(data){
+					$("#materi-id").val("");
+					ajaxload();
+				}
+			});
+    	});
+		
+	}
+	function deleteData(){
+		$(".btn-class-delete").on("click", function(){
+			var element = $(this);
+			var id_materi = element.attr("id");
+			if (confirm("Delete Materi")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_materi_usba/deleteMateri",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_materi=" + id_materi,
+					success : function(data){
+						alert(data[0]["message"]);
+						ajaxload();
+					}
+				});
+			}
+		});
+	}
+	function inputClick(){
+		$(".btn-new-materi").on("click",  function(){
+			$(".btn-input-class").show();
+    		$(".btn-edit-class").hide();
+    		$("#id-materi-id").val("");
+			$("#materi-id").val("");
+		});
+	}
+	function editView(){
+		$(".btn-class-edit").on("click", function(){
+			var element = $(this);
+			var id_materi = element.attr("id");
+			$(".btn-input-class").hide();
+			$(".btn-edit-class").show();
+			$.ajax({
+				type : "POST",
+				url : linkServer + "Api_materi_usba/viewEditMateri",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_materi=" + id_materi,
+				success : function(data){
+					$("#id-materi-id").val(data[0]["id_materi"]);
+					$("#materi-id").val(data[0]["nama_materi"]);
+				}
+			});
+		});
+	}
+	function senEditMateri(){
+		$(".btn-edit-class").on("click", function(){
+			var id_materi = $("#id-materi-id").val();
+			var nama_materi = $("#materi-id").val();
+			if (id_materi == "" || nama_materi == "") {
+				alert("nama_materi Tidak Boleh Kosong");
+			} else {
+				$.ajax({
+					type : "POST",
+					url : linkServer + "Api_materi_usba/editMateri",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_materi=" + id_materi + "&nama_materi=" + nama_materi,
+					success : function(data){
+						ajaxload();
+					}
+				});
+			}
+
+		});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Materi  
+			<button class="btn btn-primary btn-new-materi" data-toggle="modal" data-target="#myModal">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-materi"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Materi</h4>
+      </div>
+      <div class="modal-body">
+      	<input type="hidden" name="" id="id-materi-id" hidden>
+        <input type="text" class="form-control" name="materi" id="materi-id" placeholder="Nama Materi" required="">
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary btn-input-class" data-dismiss="modal">Simpan</button>
+      	<button type="button" class="btn btn-primary btn-edit-class" data-dismiss="modal">Edit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

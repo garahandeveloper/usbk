@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>SMK Nurul Mannan | Login</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="api/bootstrap/bootstrap.min.css">
+	<script src="api/bootstrap/1.12.0_jquery.min.js"></script>
+	<script src="api/bootstrap/bootstrap.min.js"></script>
+	<style type="text/css">
+		body {
+			background: no-repeat url("images/12072012636.jpg");
+			background-position-x: center;
+			background-position-y: center;
+		}
+		.panel-default {
+			width: 30%; 
+			margin: auto; 
+			background: #e5e5e5; 
+			min-width: 250px; 
+			margin-top: 30px;
+			border: 5px solid #000;
+			border-radius: 10px;
+			box-shadow: 0px 0px 50px 0px #000;
+		}
+		.label-class {
+		}
+		.panel-footer {
+			background: #555;
+		}
+	</style>
+	<script type='text/javascript'>
+		$(document).ready(function(){
+			$(".alert-message").hide();
+			if(window.XDomainRequest)
+        	contentType = "text/plain";
+			
+			//check session or localStorage
+			if(localStorage.getItem("nisn") || localStorage.getItem("nik") || localStorage.getItem("token")){
+				window.location = "index.html";
+			} else {
+				window.localStorage.clear();
+			}
+
+
+			// submit login form
+			$('#form1').submit(function(){
+				$.ajax({
+					type : 'POST',
+					url : "http://localhost:8080/usbk-server-1/Api_login_client_usba",
+					data : $(this).serialize(),
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					success : function(data){
+						$('#message').html(data[0]["NISN"]);
+						//alert(data[0]["NISN"]);
+						if(data[0]["message"] > 0){
+							
+							$(".alert-message").show();
+							if(data[0]["token"] > 0){
+								$('.alert-message').html(data[0]["nisn"]);
+								localStorage.setItem("nisn", data[0]["nisn"]);
+								localStorage.setItem("nik", data[0]["nik"]);
+								localStorage.setItem("token", data[0]["token"]);
+								localStorage.setItem("nama_siswa", data[0]["nama_siswa"]);
+								localStorage.setItem("materi", data[0]["materi"]);
+								window.location = "index.html";
+							} else {
+								$('.alert-message').html("Token Salah");
+							}
+						} else {
+							$(".alert-message").show();
+							$('.alert-message').html("NISN Atau NIK Salah");
+						}
+					}
+				})
+				return false;
+			});
+			
+		})
+		
+	</script>
+</head>
+<body>
+	<div class="container" id='page-container'>
+		<div class="panel panel-default">
+			<div id='message' class="alert alert-success alert-message"></div>
+			<div class="panel-heading" style="background: #555; color: #fff;">SMK Nurul Mannan</div>
+			<form role="form" method='post' action='' id='form1' name='form1'>
+				<div class="form-group" style="margin:10px 10px;">
+					<label for="email" class="label-class">NISN</label>
+					<input type="text" class="form-control" name='nisn' id="username" placeholder="Contoh : 2342343432" required>
+				</div>
+				<div class="form-group" style="margin:10px 10px;">
+					<label for="pwd" class="label-class">NIK</label>
+					<input type="text" class="form-control" name='nik' id="password" placeholder="Contoh : 23425232" required>
+				</div>
+				<div class="form-group" style="margin:10px 10px;">
+					<label for="pwd" class="label-class">Token</label>
+					<input type="text" class="form-control" name='token' id="password" placeholder="Contoh : 12123" required>
+				</div>
+				<div class="panel-footer">
+					<button type="submit" class="btn btn-success">Login</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

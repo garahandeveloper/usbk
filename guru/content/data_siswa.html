@@ -1,0 +1,316 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	datakelas();
+    	$(".btn-input-class").click(function(){
+    		inputData();
+    	});
+    	$(".cetak-data-siswa").on("click", function(){
+    		cetakData();
+    		alert("ok");
+    	});
+    	btnNewSiswa();
+    	btnSubmitNewSiswa();
+    	hideBtn();
+    	selectKelas();
+    	updateDataSiswa();
+	});
+	function ajaxloaddatasiswa(){
+		$('.a-class-lihat').click(function(){
+
+			$(".cetak-data-siswa").show();
+			$(".btn-new-siswa").show();
+
+			var elementId = $(this);
+			var id_kelas = elementId.attr('id');
+			localStorage.setItem("id_kelas", id_kelas);
+			//tampil input siswa
+			$(".btn-new-siswa").val(id_kelas);
+			loadAjaxSiswa();
+			
+		});
+	}
+	function loadAjaxSiswa(){
+		$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_siswa_usba/datasiswa",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_kelas=" + localStorage.getItem('id_kelas'),
+				success : function(data){
+					isiData = "";
+					isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteSiswa();" +
+							"editView();" +
+							"});<\/script>";
+					isiData += "<table class='table table-hover' id='table-id'>";
+					isiData += "<thead>"+
+						"<tr>" +
+							"<th>No</th>" +
+	        				"<th>Nama</th>" +
+	        				"<th>Nisn</th>" +
+	        				"<th>Nik</th>" +
+	        				"<th>Kelas</th>" +
+	        				
+	        			"</tr>" +
+	        			"</thead>";
+					for(var i = 0; i < data.length; i++){
+						var nomer = i + 1;
+						isiData += "<tr>" +
+							"<td>" + nomer + "</td>" +
+							"<td>" + data[i]["nama"] + "</td>" +
+							"<td>" + data[i]["nisn"] + "---------</td>" +
+							"<td>" + data[i]["nik"] + "</td>" +
+							"<td>" + data[i]["kelas"] + "</td>" +
+							
+						"</tr>";
+					}
+					
+					isiData += "</table>";
+					$(".content-view-siswa").html(isiData);
+				}
+			});
+	}
+	function datakelas(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_siswa_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"ajaxloaddatasiswa();"+
+							"});<\/script>";
+				isiData += "<table class='table table-hover' id='table-id'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Action</th>" +
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["nama_kelas"] + "</td>" +
+						"<td>" +
+							"<button class='btn btn-info a-class-lihat' id='"+data[i]["id_kelas"]+"'>View</button>" + 
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-kelas").html(isiData);
+			}
+		});
+	}
+	function btnNewSiswa(){
+		$(".btn-new-siswa").click(function(){
+			randomNumber();
+			$(".btn-input-new-class").show();
+			$("#kelas-id").val($(this).attr("value"));
+			$(".btn-edit-class").hide();
+			$("#nama-siswa").val("");
+		});
+	}
+	function randomNumber(){
+		var randomOne = Math.floor((Math.random() * 1000000000) + 5);
+		var randomTwo = Math.floor((Math.random() * 1000000000) + 5);
+		$("#nisn-siswa").val(randomOne);
+		$("#nik-siswa").val(randomTwo);
+	}
+	function btnSubmitNewSiswa(){
+		$(".btn-input-new-class").click(function(){
+			if ($("#nama-siswa").val() == "") {
+				alert("Nama Siswa Tidak Boleh Kosong");
+			} else if($("#nisn-siswa").val() == ""){
+				alert("Nisn Siswa Tidak Boleh Kosong");
+			} else if($("#nik-siswa").val() == ""){
+				alert("Nik Siswa Tidak Boleh Kosong");
+			} else if($("#kelas-id").val() == ""){
+				alert("kelas Siswa Tidak Boleh Kosong");
+			} else {
+				randomNumber();
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_siswa_usba/inputnewdatasiswa",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "nama_siswa=" + $("#nama-siswa").val() + "&nisn=" + $("#nisn-siswa").val() + "&nik=" + $("#nik-siswa").val() + "&kelas_id=" + $("#kelas-id").val(),
+					success : function(data){
+						if (data[0]["status"] == "1") {
+							loadAjaxSiswa();
+							$("#nama-siswa").val("");
+							alert("Data Siswa Berhasil Di Simpan");
+						} else {
+							alert("Gagal");
+						}
+					}
+				});
+			}
+		});
+	}
+	function hideBtn(){
+		$(".cetak-data-siswa").hide();
+		$(".btn-new-siswa").hide();
+	}
+	function deleteSiswa(){
+		$(".btn-class-delete").click(function(){
+			if (confirm("Yakin Ingin Menghapus Siswa")) {
+				var id = $(this).attr("value");
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_siswa_usba/deletedatasiswa",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_data_siswa=" + id,
+					success : function(data){
+						alert(data[0]["message"]);
+						loadAjaxSiswa();
+					}
+				});
+			}
+		});
+	}
+	function editView(){
+		$(".btn-class-edit").on("click", function(){
+			$(".btn-input-new-class").hide();
+			$(".btn-edit-class").show();
+			var id_data_siswa = $(this).attr("value");
+			$.ajax({
+				type : "POST",
+				url : linkServer + "Api_data_siswa_usba/datasiswa",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_data_siswa=" + id_data_siswa,
+				success : function(data){
+					$("#id_data_siswa").val(data[0]["id"]);
+					$("#nama-siswa").val(data[0]["nama"]);
+					$("#nisn-siswa").val(data[0]["nisn"]);
+					$("#nik-siswa").val(data[0]["nik"]);
+				}
+			});
+		});
+	}
+	function selectKelas(){
+		//jangan lupa url nya di ganti sesuai dengan link nya
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_siswa_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				
+				isiData += "<select class='form-control' id='kelas-value'>";
+				isiData += "<option value=''>Pilih Kelas</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='" + data[i]["id_kelas"]+"'>" + data[i]["nama_kelas"] + "</option>";
+				}
+				
+				isiData += "</select>";
+				$(".class-select-kelas").html(isiData);
+			}
+		});
+	}
+	function updateDataSiswa(){
+		$(".btn-edit-class").click(function(){
+			if ($("#nama-siswa").val() == "") {
+				alert("Nama Siswa Tidak Boleh Kosong");
+			} else if ($("#nisn-siswa").val() == "") {
+				alert("NISN Tidak Boleh Kosong");
+			} else if ($("#nik-siswa").val() == "") {
+				alert("NIK Tidak Boleh Kosong");
+			} else if ($("#kelas-value").val() == "") {
+				alert("Kelas Tidak Boleh Kosong");
+			} else {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_siswa_usba/updatedatasiswa",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_data_siswa=" + $("#id_data_siswa").val() + "&nama_siswa=" + $("#nama-siswa").val() + "&nisn=" + $("#nisn-siswa").val() + "&nik=" + $("#nik-siswa").val() + "&kelas_id=" + $("#kelas-value").val(),
+					success : function(data){
+						loadAjaxSiswa();
+						if (data[0]["status"] == "1") {
+							alert("Berhasil Di Simpan");
+						} else {
+							alert("Gagal");
+						}
+					}
+				});
+			}
+		});
+	}
+</script>
+<div class="container" id="container-id">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Kelas
+		</div>
+		<div class="panel-body">
+			<div class="content-view-kelas"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Siswa <button class="btn btn-primary" onclick="PrintElem('.content-view-siswa')">Print</button>
+			<button class="btn btn-primary btn-new-siswa" data-toggle="modal" data-target="#myModal" value=''>
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+			<a href="content/cetak_data_siswa.html" class="btn btn-primary cetak-data-siswa" target="_top">Cetak</a>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-siswa"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Materi</h4>
+      </div>
+      <div class="modal-body">
+      	<input type="hidden" name="" id="id-kelas-id" hidden>
+      	<input type="hidden" name="" id="id_data_siswa" hidden>
+        <input type="text" class="form-control"  id="nama-siswa" placeholder="Nama Siswa" required="">
+        <div class="input-group mb-2 mb-sm-0">
+        	<div class="input-group-addon" style="width: 100px;">NISN</div>
+        	<input type="text" class="form-control"  id="nisn-siswa" readonly="">
+        </div>
+        <div class="input-group mb-2 mb-sm-0">
+        	<div class="input-group-addon" style="width: 100px;">NIK</div>
+        	<input type="text" class="form-control"  id="nik-siswa"  readonly="">
+        </div>
+        <div class="class-select-kelas"></div>
+        <input type="hidden" class="form-control"  id="kelas-id" hidden>
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary btn-input-new-class" value="">Simpan</button>
+      	<button type="button" class="btn btn-primary btn-edit-class" data-dismiss="modal">Edit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

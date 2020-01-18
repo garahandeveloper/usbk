@@ -1,0 +1,147 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ajaxload();
+
+    	$(".btn-input-class").click(function(){
+    		inputData();
+    	});
+    	inputKelas();
+    	btnNewkelas();
+	});
+	function ajaxload(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_kelas_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"deleteKelas();"+
+							"btnClassEdit();" +
+							"});<\/script>";
+				isiData += "<table class='table table-hover' id='table-id'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Action</th>" +
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["nama_kelas"] + "</td>" +
+						"<td>" +
+							"<button class='btn btn-success btn-class-edit' data-toggle='modal' data-target='#myModal'>Edit</button> " + 
+							"<a href='#' class='btn btn-danger btn-class-delete' id='delete' value='"+ data[i]["id_kelas"] +"'>Delete</a>" + 
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-kelas").html(isiData);
+			}
+		});
+	}
+	function inputKelas(){
+		$(".btn-input-new-class").click(function(){
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_kelas_usba/inputkelas",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "nama_kelas=" + $('#kelas-id').val(),
+				success : function(data){
+					for(var i = 0; i < data.length; i++){
+						if (data[i]["status"] == "1") {
+							alert("Data Tersimpan");
+						} else {
+							alert("Gagal Tersimpan");
+						}
+					}
+					ajaxload();
+				}
+			});
+		});
+	}
+	function btnNewkelas(){
+		$(".btn-new-kelas").click(function(){
+			$(".btn-edit-class").hide();
+		});
+	}
+	function deleteKelas(){
+		$(".btn-class-delete").click(function(){
+			if (confirm("Yakin Ingin Di Hapus")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_kelas_usba/deletekelas",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_kelas=" + $(this).attr("value"),
+					success : function(data){
+						alert(data[0]["message"]);
+						ajaxload();
+					}
+				});
+			}
+		});
+	}
+	function btnClassEdit(){
+		$(".btn-class-edit").click(function(){
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_kelas_usba/deletekelas",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_kelas=" + $(this).attr("value"),
+				success : function(data){
+				}
+			});
+		});
+	}
+</script>
+<div class="container" id="container-id">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Kelas
+			<button class="btn btn-primary btn-new-kelas" data-toggle="modal" data-target="#myModal">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-kelas"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+	
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Materi</h4>
+      </div>
+      <div class="modal-body">
+      	<input type="hidden" name="" id="id-kelas-id" hidden>
+        <input type="text" class="form-control" name="kelas" id="kelas-id" placeholder="Nama Kelas" required="">
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary btn-input-new-class" data-dismiss="modal">Simpan</button>
+      	<button type="button" class="btn btn-primary btn-edit-class" data-dismiss="modal">Edit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

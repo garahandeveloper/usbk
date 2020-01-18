@@ -1,0 +1,37 @@
+$(document).ready(function(){
+	$(".content-view").load("content/halaman.html");
+	$("#data-halaman").click(function(){
+		$(".content-view").load("content/halaman.html");
+	});
+	$("#login").click(function(){
+		$(".content-view").load("content/soal.html");
+	});
+	$("#data-soal").click(function(){
+		$(".content-view").load("content/data_soal.html");
+	});
+	$("#data-guru").click(function(){
+		$(".content-view").load("content/data_guru.html");
+	});
+	$("#data-materi").click(function(){
+		$(".content-view").load("content/data_materi.html");
+	});
+	$("#data-ujian").click(function(){
+		$(".content-view").load("content/data_ujian.html");
+	});
+	$("#data-nilai-permapel").click(function(){
+		$(".content-view").load("content/data_nilai_permapel.html");
+	});
+	$("#data-nilai-persiswa").click(function(){
+		$(".content-view").load("content/data_nilai_persiswa.html");
+	});
+	$("#data-siswa").click(function(){
+		$(".content-view").load("content/data_siswa.html");
+	});
+	$("#data-kelas").click(function(){
+		$(".content-view").load("content/data_kelas.html");
+	});
+	$("#data-ujian-gabungan").click(function(){
+		$(".content-view").load("content/data_ujian_gabungan.html");
+	});
+
+});

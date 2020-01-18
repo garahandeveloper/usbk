@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>YPI-NURMA</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../api/bootstrap/bootstrap.min.css">
+    <script src="../api/bootstrap/1.12.0_jquery.min.js"></script>
+    <script src="../api/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	cetakData()
+
+	});
+    function cetakData(){
+        var id = localStorage.getItem("id_kelas");
+        $.ajax({
+            type : "POST",
+            url : "http://localhost/usba-server/Api_data_siswa_usba/datasiswa",
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType    : "json",
+            data : "id_kelas=" + localStorage.getItem('id_kelas'),
+            success : function(data){
+                isiData = "";
+                isiData += "<table class='table'>";
+                isiData += "<tr>" +
+                        "<th>No</th>" +
+                        "<th>Nama</th>" +
+                        "<th>Nisn</th>" +
+                        "<th>Nik</th>" +
+                        "<th>Kelas</th>" +
+                    "</tr>";
+                for(var i = 0; i < data.length; i++){
+                    var nomer = i + 1;
+                    isiData += "<tr>" +
+                        "<td>" + nomer + "</td>" +
+                        "<td>" + data[i]["nama"] + "</td>" +
+                        "<td>" + data[i]["nisn"] + "</td>" +
+                        "<td>" + data[i]["nik"] + "</td>" +
+                        "<td>" + data[i]["kelas"] + "</td>" +
+                    "</tr>";
+                }
+                
+                isiData += "</table>";
+                $(".content-view-cetak").html(isiData);
+            }
+        });
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="content-view-cetak"></div>
+    </div>
+</body>
+</html>

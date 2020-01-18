@@ -1,0 +1,289 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(window.XDomainRequest)
+        contentType = "text/plain";
+    	ujian();
+    	inputUjian();
+    	loadmateri();
+    	loadkelas();
+    	loadGuru();
+    	clickBtnNew();
+    	editUjian();
+	});
+	function ujian(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_ujian_usba/dataujian",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : "for=1",
+			success : function(data){
+				isiData = "";
+				isiData += "<script type='text/javascript'>" +
+							"$(document).ready(function(){"+
+							"viewEditUjian();"+
+							"deleteUjian();"+
+							"});<\/script>";
+				isiData += "<table class='table table-hover'>";
+				isiData += "<thead>"+
+					"<tr>" +
+						"<th>No</th>" +
+        				"<th>Nama Ujian</th>" +
+        				"<th>Kelas</th>" +
+        				"<th>Materi</th>" +
+        				"<th>token</th>" +
+        				"<th>Act</th>" 
+        			"</tr>" +
+        			"</thead>";
+				for(var i = 0; i < data.length; i++){
+					var nomer = i + 1;
+					isiData += "<tr>" +
+						"<td>" + nomer + "</td>" +
+						"<td>" + data[i]["ujian"] + "</td>" +
+						"<td>" + data[i]["kelas"] + "</td>" +
+						"<td>" + data[i]["materi"] + "</td>" +
+						"<td>" + data[i]["token"] + "</td>" +
+						"<td>"+
+							" <button  class='btn btn-success modal-class-edit-ujian' id='"+data[i]["id_ujian"]+"' data-toggle='modal' data-target='#myModalplusDataUjian'>Edit</button> "+
+							" <button  class='btn btn-danger modal-class delete-class' id='"+data[i]["id_ujian"]+"'>Delete</button> "+
+						"</td>" +
+					"</tr>";
+				}
+				
+				isiData += "</table>";
+				$(".content-view-ujian").html(isiData);
+			}
+		});
+	}
+	
+	function inputUjian(){
+		$(".btn-input-ujian-class").on("click",function(){
+			var nama_ujian = $("#nama-ujian-id").val();
+			var kelas_ujian = $("#kelas-ujian-id").val();
+			var guru_ujian = $("#guru-ujian-id").val();
+			var materi_ujian = $("#materi-ujian-id").val();
+			var jumlah_ujian = $("#jumlah-ujian-id").val();
+
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_usba/inputUjian",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "nama_ujian=" + nama_ujian + "&kelas=" + kelas_ujian + "&guru=" + guru_ujian + "&materi=" + materi_ujian + "&jumlah_ujian=" + jumlah_ujian,
+				success : function(data){
+					$("#nama-ujian-id").val("");
+					$("#kelas-ujian-id").val("");
+					$("#guru-ujian-id").val("");
+					$("#materi-ujian-id").val("");
+					$("#jumlah-ujian-id").val("");
+					ujian();
+				}
+			});
+		});
+	}
+	function loadmateri(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_materi_usba/datamateri",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='materi-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Materi</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_materi"]+"'>"+data[i]["materi"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-materi").html(isiData);
+			}
+		});
+	}
+	function loadkelas(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_siswa_usba/datakelas",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='kelas-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Kelas</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_kelas"]+"'>"+data[i]["nama_kelas"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-kelas").html(isiData);
+			}
+		});
+	}
+	function loadGuru(){
+		$.ajax({
+			type : "POST",
+			url : linkServer +"Api_data_guru_usba/dataGuru",
+			contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			dataType    : "json",
+			data : $(this).serialize(),
+			success : function(data){
+				isiData = "";
+				isiData += "<select id='guru-ujian-id' class='form-control' required>" +
+						   "<option value=''>Pilih Guru</option>";
+				for(var i = 0; i < data.length; i++){
+					isiData += "<option value='"+data[i]["id_guru"]+"'>"+data[i]["nama_guru"]+"</option>";
+				}
+				
+				isiData += "</select>";
+				$(".view-data-guru").html(isiData);
+			}
+		});
+	}
+	function viewEditUjian(){
+		$(".modal-class-edit-ujian").click(function(){
+			$(".btn-input-ujian-class").hide();
+			$(".btn-edit-ujian-class").show();
+			$.ajax({
+				type : "POST",
+				url : linkServer +"Api_data_ujian_usba/dataujian",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				dataType    : "json",
+				data : "id_ujian=" + $(this).attr("id"),
+				success : function(data){
+					$("#id_ujian").val(data[0]["id_ujian"]);
+					$("#nama-ujian-id").val(data[0]["ujian"]);
+					$("#jumlah-ujian-id").val(data[0]["jumlah"]);
+				}
+			});
+		});
+	}
+	function clickBtnNew(){
+		$(".btn-class-new").click(function(){
+			$("#nama-ujian-id").val("");
+			$("#guru-ujian-id").val("");
+			$("#kelas-ujian-id").val("");
+			$("#materi-ujian-id").val("");
+			$("#jumlah-ujian-id").val("");
+			$(".btn-edit-ujian-class").hide();
+			$(".btn-input-ujian-class").show();
+		});
+	}
+	function editUjian(){
+		$(".btn-edit-ujian-class").on("click",function(){
+			var id_ujian = $("#id_ujian").val();
+			var nama_ujian = $("#nama-ujian-id").val();
+			var kelas_ujian = $("#kelas-ujian-id").val();
+			var guru_ujian = $("#guru-ujian-id").val();
+			var materi_ujian = $("#materi-ujian-id").val();
+			var jumlah_ujian = $("#jumlah-ujian-id").val();
+			if (id_ujian == "") {
+				alert("Id Ujian Jangan Kosong");
+			} else if (nama_ujian == "") {
+				alert("Nama Ujian Jangan Kosong");
+			} else if (kelas_ujian == "") {
+				alert("Kelas Yang Di Ujikan Jangan Kosong");
+			} else if (guru_ujian == "") {
+				alert("Guru Pengampu Materi Jangan Kosong");
+			} else if (materi_ujian == "") {
+				alert("Materi Ujian Jangan Kosong");
+			} else if (jumlah_ujian == "") {
+				alert("Jumlah Ujian Jangan Kosong");
+			} else {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_ujian_usba/updateUjian",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_ujian=" + id_ujian + "&nama_ujian=" + nama_ujian + "&kelas=" + kelas_ujian + "&guru=" + guru_ujian + "&materi=" + materi_ujian + "&jumlah_ujian=" + jumlah_ujian,
+					success : function(data){
+						if (data[0]["status"] == "1") {
+							alert("Success");
+							$("#nama-ujian-id").val("");
+							$("#kelas-ujian-id").val("");
+							$("#guru-ujian-id").val("");
+							$("#materi-ujian-id").val("");
+							$("#jumlah-ujian-id").val("");
+							ujian();
+						} else {
+							alert("Gagal");
+						}
+					}
+				});
+			}
+		});
+	}
+	function deleteUjian(){
+		$(".delete-class").click(function(){
+			if (confirm("YaKin Ingin Di Hapus")) {
+				$.ajax({
+					type : "POST",
+					url : linkServer +"Api_data_ujian_usba/deleteujian",
+					contentType: "application/x-www-form-urlencoded; charset=utf-8",
+					dataType    : "json",
+					data : "id_ujian=" + $(this).attr("id"),
+					success : function(data){
+						alert(data[0]["message"]);
+						ujian();
+					}
+				});
+			}
+		});
+	}
+</script>
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Data Ujian Keseluruhan 
+			<button type="button" class="btn btn-primary btn-sm btn-class-new" data-toggle="modal" data-target="#myModalplusDataUjian">
+	          <span class="glyphicon glyphicon-plus"></span>
+	        </button>
+		</div>
+		<div class="panel-body">
+			<div class="content-view-ujian"></div>
+		</div>
+		<div class="panel-footer"></div>
+	</div>
+</div>
+<!-- Modal -->
+<div id="myModalplusDataUjian" class="modal fade" role="dialog" style="overflow:scroll;">
+	<div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Tambah Data Ujian</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+        	<input type='hidden' class='form-control' id='id_ujian' hidden>
+        	<input type='text' class='form-control' id='nama-ujian-id' placeholder="Nama Ujian" required>
+        </div>
+
+        <div class="form-group">
+        	<div class="view-data-kelas"></div>
+        </div>
+
+		<div class="form-group">
+			<div class="view-data-guru"></div>
+        </div>
+
+		<div class="form-group">
+			<div class="view-data-materi"></div>
+        </div>
+
+        <div class="form-group">
+	        <input type='text' class='form-control' id='jumlah-ujian-id' placeholder="Jumlah Ujian" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+      <button type="button" class="btn btn-primary btn-input-ujian-class">Simpan</button>
+      <button type="button" class="btn btn-primary btn-edit-ujian-class">Edit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
